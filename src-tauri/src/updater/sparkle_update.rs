@@ -27,7 +27,7 @@ pub async fn update(app_path: &str, download_url: Option<&str>, app: &AppHandle)
             .output()
         {
             if output.status.success() {
-                return Ok(format!("Updating {} via Sparkle", app_name));
+                return Ok(format!("Updating {app_name} via Sparkle"));
             }
         }
 
@@ -38,17 +38,16 @@ pub async fn update(app_path: &str, download_url: Option<&str>, app: &AppHandle)
         let script = format!(
             r#"
             tell application "System Events"
-                tell process "{}"
+                tell process "{app_name}"
                     try
-                        click menu item "Check for Updates…" of menu 1 of menu bar item "{}" of menu bar 1
+                        click menu item "Check for Updates…" of menu 1 of menu bar item "{app_name}" of menu bar 1
                     end try
                     try
-                        click menu item "Check for Updates..." of menu 1 of menu bar item "{}" of menu bar 1
+                        click menu item "Check for Updates..." of menu 1 of menu bar item "{app_name}" of menu bar 1
                     end try
                 end tell
             end tell
-            "#,
-            app_name, app_name, app_name
+            "#
         );
 
         let _ = Command::new("osascript")
@@ -56,27 +55,27 @@ pub async fn update(app_path: &str, download_url: Option<&str>, app: &AppHandle)
             .arg(&script)
             .output();
 
-        Ok(format!("Opened {} — checking for updates", app_name))
+        Ok(format!("Opened {app_name} — checking for updates"))
     })
     .await
-    .map_err(|e| format!("Task error: {}", e))?
+    .map_err(|e| format!("Task error: {e}"))?
 }
 
 async fn download_and_install(url: &str, app_path: &str, app: &AppHandle) -> Result<String, String> {
-    eprintln!("[Latest] Sparkle download: {}", url);
+    eprintln!("[Latest] Sparkle download: {url}");
     emit_progress(app, app_path, "downloading", 0);
 
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(120))
         .build()
-        .map_err(|e| format!("HTTP client error: {}", e))?;
+        .map_err(|e| format!("HTTP client error: {e}"))?;
 
     let response = client
         .get(url)
         .header("User-Agent", "Latest/0.1")
         .send()
         .await
-        .map_err(|e| format!("Download failed: {}", e))?;
+        .map_err(|e| format!("Download failed: {e}"))?;
 
     if !response.status().is_success() {
         return Err(format!("Download failed: HTTP {}", response.status()));
@@ -92,7 +91,7 @@ async fn download_and_install(url: &str, app_path: &str, app: &AppHandle) -> Res
     while let Some(chunk) = response
         .chunk()
         .await
-        .map_err(|e| format!("Download error: {}", e))?
+        .map_err(|e| format!("Download error: {e}"))?
     {
         downloaded += chunk.len() as u64;
         bytes.extend_from_slice(&chunk);
@@ -124,11 +123,11 @@ async fn download_and_install(url: &str, app_path: &str, app: &AppHandle) -> Res
 
     let tmp_dir = std::env::temp_dir().join("latest-updates");
     std::fs::create_dir_all(&tmp_dir)
-        .map_err(|e| format!("Failed to create temp dir: {}", e))?;
+        .map_err(|e| format!("Failed to create temp dir: {e}"))?;
 
-    let tmp_file = tmp_dir.join(format!("sparkle-update.{}", ext));
+    let tmp_file = tmp_dir.join(format!("sparkle-update.{ext}"));
     std::fs::write(&tmp_file, &bytes)
-        .map_err(|e| format!("Failed to save download: {}", e))?;
+        .map_err(|e| format!("Failed to save download: {e}"))?;
 
     let dest = app_path.to_string();
     let result = tokio::task::spawn_blocking(move || {
@@ -143,7 +142,7 @@ async fn download_and_install(url: &str, app_path: &str, app: &AppHandle) -> Res
         }
     })
     .await
-    .map_err(|e| format!("Install error: {}", e))?;
+    .map_err(|e| format!("Install error: {e}"))?;
 
     emit_progress(app, app_path, "installing", 100);
 

@@ -21,7 +21,7 @@ pub async fn check_homebrew_updates() -> Vec<UpdateCheckResult> {
         let json: serde_json::Value = match serde_json::from_slice(&output.stdout) {
             Ok(v) => v,
             Err(e) => {
-                eprintln!("[Latest] Failed to parse brew outdated JSON: {}", e);
+                eprintln!("[Latest] Failed to parse brew outdated JSON: {e}");
                 return vec![];
             }
         };
@@ -63,7 +63,7 @@ pub async fn check_brew_cask_versions(apps: &[AppInfo]) -> Vec<UpdateCheckResult
     let cask_map = match fetch_cask_map().await {
         Ok(m) => m,
         Err(e) => {
-            eprintln!("[Latest] Failed to fetch cask data: {}", e);
+            eprintln!("[Latest] Failed to fetch cask data: {e}");
             return vec![];
         }
     };
@@ -111,14 +111,14 @@ async fn fetch_cask_map() -> Result<HashMap<String, CaskInfo>, String> {
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(30))
         .build()
-        .map_err(|e| format!("HTTP client error: {}", e))?;
+        .map_err(|e| format!("HTTP client error: {e}"))?;
 
     let response = client
         .get("https://formulae.brew.sh/api/cask.json")
         .header("User-Agent", "Latest/0.1")
         .send()
         .await
-        .map_err(|e| format!("Network error: {}", e))?;
+        .map_err(|e| format!("Network error: {e}"))?;
 
     if !response.status().is_success() {
         return Err(format!("HTTP {}", response.status()));
@@ -127,7 +127,7 @@ async fn fetch_cask_map() -> Result<HashMap<String, CaskInfo>, String> {
     let casks: Vec<serde_json::Value> = response
         .json()
         .await
-        .map_err(|e| format!("Parse error: {}", e))?;
+        .map_err(|e| format!("Parse error: {e}"))?;
 
     let mut map = HashMap::new();
 

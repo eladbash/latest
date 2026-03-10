@@ -39,7 +39,7 @@ pub async fn get_applications() -> Vec<RawApp> {
     match parsed {
         Ok(data) => data.applications,
         Err(e) => {
-            eprintln!("Failed to parse system_profiler JSON: {}", e);
+            eprintln!("Failed to parse system_profiler JSON: {e}");
             vec![]
         }
     }

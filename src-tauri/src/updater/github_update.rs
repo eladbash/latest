@@ -28,21 +28,21 @@ pub async fn update(download_url: &str, app_path: &str, app: &AppHandle) -> Resu
     let url = download_url.to_string();
     let app_dest = app_path.to_string();
 
-    eprintln!("[Latest] Downloading: {}", url);
+    eprintln!("[Latest] Downloading: {url}");
     emit_progress(app, app_path, "downloading", 0);
 
     // Download the file
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(120))
         .build()
-        .map_err(|e| format!("HTTP client error: {}", e))?;
+        .map_err(|e| format!("HTTP client error: {e}"))?;
 
     let response = client
         .get(&url)
         .header("User-Agent", "Latest/0.1")
         .send()
         .await
-        .map_err(|e| format!("Download failed: {}", e))?;
+        .map_err(|e| format!("Download failed: {e}"))?;
 
     if !response.status().is_success() {
         return Err(format!("Download failed with status: {}", response.status()));
@@ -71,7 +71,7 @@ pub async fn update(download_url: &str, app_path: &str, app: &AppHandle) -> Resu
     while let Some(chunk) = response
         .chunk()
         .await
-        .map_err(|e| format!("Download error: {}", e))?
+        .map_err(|e| format!("Download error: {e}"))?
     {
         downloaded += chunk.len() as u64;
         bytes.extend_from_slice(&chunk);
@@ -92,11 +92,11 @@ pub async fn update(download_url: &str, app_path: &str, app: &AppHandle) -> Resu
 
     let tmp_dir = std::env::temp_dir().join("latest-updates");
     std::fs::create_dir_all(&tmp_dir)
-        .map_err(|e| format!("Failed to create temp dir: {}", e))?;
+        .map_err(|e| format!("Failed to create temp dir: {e}"))?;
 
-    let tmp_file = tmp_dir.join(format!("update.{}", ext));
+    let tmp_file = tmp_dir.join(format!("update.{ext}"));
     std::fs::write(&tmp_file, &bytes)
-        .map_err(|e| format!("Failed to save download: {}", e))?;
+        .map_err(|e| format!("Failed to save download: {e}"))?;
 
     // Install based on type
     let result = tokio::task::spawn_blocking(move || {
@@ -108,7 +108,7 @@ pub async fn update(download_url: &str, app_path: &str, app: &AppHandle) -> Resu
         }
     })
     .await
-    .map_err(|e| format!("Install task error: {}", e))?;
+    .map_err(|e| format!("Install task error: {e}"))?;
 
     emit_progress(app, app_path, "installing", 100);
 
@@ -143,22 +143,22 @@ pub fn install_zip_pub(zip_path: &Path, app_dest: &str) -> Result<String, String
 }
 
 fn install_dmg(dmg_path: &Path, app_dest: &str) -> Result<String, String> {
-    eprintln!("[Latest] Mounting DMG: {:?}", dmg_path);
+    eprintln!("[Latest] Mounting DMG: {dmg_path:?}");
 
     // Mount the DMG (no -quiet, we need stdout to find the mount point)
     let mount_output = Command::new("hdiutil")
         .args(["attach", "-nobrowse", "-noverify", "-noautoopen"])
         .arg(dmg_path)
         .output()
-        .map_err(|e| format!("Failed to mount DMG: {}", e))?;
+        .map_err(|e| format!("Failed to mount DMG: {e}"))?;
 
     if !mount_output.status.success() {
         let stderr = String::from_utf8_lossy(&mount_output.stderr);
-        return Err(format!("Failed to mount DMG: {}", stderr));
+        return Err(format!("Failed to mount DMG: {stderr}"));
     }
 
     let stdout = String::from_utf8_lossy(&mount_output.stdout);
-    eprintln!("[Latest] hdiutil output: {}", stdout);
+    eprintln!("[Latest] hdiutil output: {stdout}");
 
     // Find the mount point (last column of last line with a /Volumes path)
     let mount_point = stdout
@@ -166,25 +166,25 @@ fn install_dmg(dmg_path: &Path, app_dest: &str) -> Result<String, String> {
         .filter_map(|line| {
             // hdiutil output is tab-separated, mount point is the last column
             line.split('\t')
-                .last()
+                .next_back()
                 .map(|s| s.trim().to_string())
                 .filter(|s| s.starts_with("/Volumes/"))
         })
-        .last()
+        .next_back()
         .ok_or("Could not find DMG mount point")?;
 
-    eprintln!("[Latest] Mounted at: {}", mount_point);
+    eprintln!("[Latest] Mounted at: {mount_point}");
 
     // Find .app in the mounted volume
     let app_name = find_app_in_dir(&mount_point);
 
     let result = if let Some(app_name) = app_name {
-        let source = format!("{}/{}", mount_point, app_name);
+        let source = format!("{mount_point}/{app_name}");
         let dest_dir = Path::new(app_dest)
             .parent()
             .unwrap_or(Path::new("/Applications"));
 
-        eprintln!("[Latest] Copying {} to {:?}", source, dest_dir);
+        eprintln!("[Latest] Copying {source} to {dest_dir:?}");
 
         // Remove old version first
         if Path::new(app_dest).exists() {
@@ -196,13 +196,13 @@ fn install_dmg(dmg_path: &Path, app_dest: &str) -> Result<String, String> {
         let cp = Command::new("cp")
             .args(["-R", &source, &dest_dir.to_string_lossy()])
             .output()
-            .map_err(|e| format!("Failed to copy app: {}", e))?;
+            .map_err(|e| format!("Failed to copy app: {e}"))?;
 
         if cp.status.success() {
-            Ok(format!("Updated {}", app_name))
+            Ok(format!("Updated {app_name}"))
         } else {
             let stderr = String::from_utf8_lossy(&cp.stderr);
-            Err(format!("Copy failed: {}", stderr))
+            Err(format!("Copy failed: {stderr}"))
         }
     } else {
         Err("No .app found in DMG".to_string())
@@ -217,7 +217,7 @@ fn install_dmg(dmg_path: &Path, app_dest: &str) -> Result<String, String> {
 }
 
 fn install_zip(zip_path: &Path, app_dest: &str) -> Result<String, String> {
-    eprintln!("[Latest] Extracting ZIP: {:?}", zip_path);
+    eprintln!("[Latest] Extracting ZIP: {zip_path:?}");
 
     let extract_dir = zip_path.parent().unwrap().join("extracted");
     let _ = std::fs::create_dir_all(&extract_dir);
@@ -228,11 +228,11 @@ fn install_zip(zip_path: &Path, app_dest: &str) -> Result<String, String> {
         .arg("-d")
         .arg(&extract_dir)
         .output()
-        .map_err(|e| format!("Failed to unzip: {}", e))?;
+        .map_err(|e| format!("Failed to unzip: {e}"))?;
 
     if !unzip.status.success() {
         let stderr = String::from_utf8_lossy(&unzip.stderr);
-        return Err(format!("Unzip failed: {}", stderr));
+        return Err(format!("Unzip failed: {stderr}"));
     }
 
     // Find .app in extracted dir
@@ -254,15 +254,15 @@ fn install_zip(zip_path: &Path, app_dest: &str) -> Result<String, String> {
         let cp = Command::new("cp")
             .args(["-R"])
             .arg(&source)
-            .arg(&dest_dir)
+            .arg(dest_dir)
             .output()
-            .map_err(|e| format!("Failed to copy app: {}", e))?;
+            .map_err(|e| format!("Failed to copy app: {e}"))?;
 
         if cp.status.success() {
-            Ok(format!("Updated {}", app_name))
+            Ok(format!("Updated {app_name}"))
         } else {
             let stderr = String::from_utf8_lossy(&cp.stderr);
-            Err(format!("Copy failed: {}", stderr))
+            Err(format!("Copy failed: {stderr}"))
         }
     } else {
         Err("No .app found in ZIP".to_string())
@@ -270,13 +270,13 @@ fn install_zip(zip_path: &Path, app_dest: &str) -> Result<String, String> {
 }
 
 fn install_pkg(pkg_path: &Path) -> Result<String, String> {
-    eprintln!("[Latest] Installing PKG: {:?}", pkg_path);
+    eprintln!("[Latest] Installing PKG: {pkg_path:?}");
 
     // Use `open` to launch the .pkg installer (prompts the user)
     let output = Command::new("open")
         .arg(pkg_path)
         .output()
-        .map_err(|e| format!("Failed to open installer: {}", e))?;
+        .map_err(|e| format!("Failed to open installer: {e}"))?;
 
     if output.status.success() {
         Ok("Opened installer — follow the prompts to complete".to_string())

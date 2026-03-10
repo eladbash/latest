@@ -63,7 +63,7 @@ pub async fn trigger_update(
         "Sparkle" => UpdateSourceType::Sparkle,
         "Homebrew" => UpdateSourceType::Homebrew,
         "MacAppStore" => UpdateSourceType::MacAppStore,
-        _ => return Err(format!("Unknown source type: {}", source)),
+        _ => return Err(format!("Unknown source type: {source}")),
     };
 
     // Find download URL from stored results
@@ -113,7 +113,7 @@ pub fn set_check_interval(
         "OneHour" => CheckInterval::OneHour,
         "SixHours" => CheckInterval::SixHours,
         "Daily" => CheckInterval::Daily,
-        _ => return Err(format!("Unknown interval: {}", interval)),
+        _ => return Err(format!("Unknown interval: {interval}")),
     };
 
     let mut s = settings::load_settings(&app);
@@ -213,14 +213,13 @@ pub async fn quit_app(app_path: String) -> Result<(), String> {
             return Err("Could not determine app name".to_string());
         }
 
-        eprintln!("[Latest] Quitting: {}", app_name);
+        eprintln!("[Latest] Quitting: {app_name}");
 
         // Use osascript to gracefully quit the app
         let _ = std::process::Command::new("osascript")
             .arg("-e")
             .arg(format!(
-                "tell application \"{}\" to quit",
-                app_name
+                "tell application \"{app_name}\" to quit"
             ))
             .output();
 
@@ -233,13 +232,13 @@ pub async fn quit_app(app_path: String) -> Result<(), String> {
                 .map(|o| o.status.success())
                 .unwrap_or(false);
             if !still_running {
-                eprintln!("[Latest] {} has quit", app_name);
+                eprintln!("[Latest] {app_name} has quit");
                 return Ok(());
             }
         }
 
         // Force kill if still running
-        eprintln!("[Latest] Force killing {}", app_name);
+        eprintln!("[Latest] Force killing {app_name}");
         let _ = std::process::Command::new("pkill")
             .args(["-f", &path])
             .output();
@@ -255,11 +254,11 @@ pub async fn quit_app(app_path: String) -> Result<(), String> {
 #[tauri::command]
 pub async fn reopen_app(app_path: String) -> Result<(), String> {
     tokio::task::spawn_blocking(move || {
-        eprintln!("[Latest] Reopening: {}", app_path);
+        eprintln!("[Latest] Reopening: {app_path}");
         let output = std::process::Command::new("open")
             .arg(&app_path)
             .output()
-            .map_err(|e| format!("Failed to open app: {}", e))?;
+            .map_err(|e| format!("Failed to open app: {e}"))?;
         if output.status.success() {
             Ok(())
         } else {
@@ -271,7 +270,7 @@ pub async fn reopen_app(app_path: String) -> Result<(), String> {
 }
 
 fn get_bundle_id_from_path(app_path: &str) -> Option<String> {
-    let plist_path = format!("{}/Contents/Info.plist", app_path);
+    let plist_path = format!("{app_path}/Contents/Info.plist");
     let val = plist::from_file::<_, plist::Value>(&plist_path).ok()?;
     val.as_dictionary()?
         .get("CFBundleIdentifier")?

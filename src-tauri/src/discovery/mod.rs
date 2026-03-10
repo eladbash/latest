@@ -108,8 +108,8 @@ pub async fn discover_apps() -> Vec<AppInfo> {
 }
 
 fn find_icon_path(app_path: &str) -> Option<String> {
-    let resources = format!("{}/Contents/Resources", app_path);
-    let plist_path = format!("{}/Contents/Info.plist", app_path);
+    let resources = format!("{app_path}/Contents/Resources");
+    let plist_path = format!("{app_path}/Contents/Info.plist");
 
     // Try reading icon name from Info.plist
     if let Ok(plist_val) = plist::from_file::<_, plist::Value>(&plist_path) {
@@ -121,9 +121,9 @@ fn find_icon_path(app_path: &str) -> Option<String> {
                 let name = if icon_name.ends_with(".icns") {
                     icon_name.to_string()
                 } else {
-                    format!("{}.icns", icon_name)
+                    format!("{icon_name}.icns")
                 };
-                let icon = format!("{}/{}", resources, name);
+                let icon = format!("{resources}/{name}");
                 if std::path::Path::new(&icon).exists() {
                     return Some(icon);
                 }
@@ -132,7 +132,7 @@ fn find_icon_path(app_path: &str) -> Option<String> {
     }
 
     // Fallback: AppIcon.icns
-    let fallback = format!("{}/AppIcon.icns", resources);
+    let fallback = format!("{resources}/AppIcon.icns");
     if std::path::Path::new(&fallback).exists() {
         return Some(fallback);
     }

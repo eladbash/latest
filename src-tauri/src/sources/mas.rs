@@ -4,12 +4,11 @@ use std::process::Command;
 pub async fn check_mas_updates() -> Vec<UpdateCheckResult> {
     tokio::task::spawn_blocking(|| {
         // Check if mas is installed
-        if Command::new("which")
+        if !Command::new("which")
             .arg("mas")
             .output()
             .map(|o| o.status.success())
             .unwrap_or(false)
-            == false
         {
             return vec![];
         }

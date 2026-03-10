@@ -7,27 +7,27 @@ pub async fn update(app_name: &str) -> Result<String, String> {
         let token = find_cask_token(&name)
             .unwrap_or_else(|| name.to_lowercase().replace(' ', "-"));
 
-        eprintln!("[Latest] Running: brew upgrade --cask {}", token);
+        eprintln!("[Latest] Running: brew upgrade --cask {token}");
 
         let output = Command::new("brew")
             .args(["upgrade", "--cask", &token])
             .output()
-            .map_err(|e| format!("Failed to run brew: {}", e))?;
+            .map_err(|e| format!("Failed to run brew: {e}"))?;
 
         let stdout = String::from_utf8_lossy(&output.stdout);
         let stderr = String::from_utf8_lossy(&output.stderr);
 
-        eprintln!("[Latest] brew stdout: {}", stdout);
-        eprintln!("[Latest] brew stderr: {}", stderr);
+        eprintln!("[Latest] brew stdout: {stdout}");
+        eprintln!("[Latest] brew stderr: {stderr}");
 
         if output.status.success() {
-            Ok(format!("Updated {} via Homebrew", name))
+            Ok(format!("Updated {name} via Homebrew"))
         } else {
             Err(format!("Brew upgrade failed: {}", stderr.trim()))
         }
     })
     .await
-    .map_err(|e| format!("Task error: {}", e))?
+    .map_err(|e| format!("Task error: {e}"))?
 }
 
 fn find_cask_token(app_name: &str) -> Option<String> {

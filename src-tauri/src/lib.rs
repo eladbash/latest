@@ -27,7 +27,7 @@ pub fn run() {
             tray::create_tray(app)?;
 
             // Load settings and start scheduler
-            let loaded = settings::load_settings(&app.handle());
+            let loaded = settings::load_settings(app.handle());
             let interval_secs = loaded.check_interval.to_secs();
             let (interval_tx, interval_rx) = tokio::sync::watch::channel(interval_secs);
 

@@ -56,19 +56,19 @@ async fn fetch_latest_version(
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(10))
         .build()
-        .map_err(|e| format!("HTTP client error: {}", e))?;
+        .map_err(|e| format!("HTTP client error: {e}"))?;
 
     let response = client
         .get(feed_url)
         .header("User-Agent", "Latest/0.1")
         .send()
         .await
-        .map_err(|e| format!("Network error: {}", e))?;
+        .map_err(|e| format!("Network error: {e}"))?;
 
     let body = response
         .text()
         .await
-        .map_err(|e| format!("Read error: {}", e))?;
+        .map_err(|e| format!("Read error: {e}"))?;
 
     parse_appcast(&body)
 }
@@ -124,7 +124,7 @@ fn parse_appcast(xml: &str) -> Result<(String, Option<String>), String> {
                 in_item = false;
             }
             Ok(Event::Eof) => break,
-            Err(e) => return Err(format!("XML parse error: {}", e)),
+            Err(e) => return Err(format!("XML parse error: {e}")),
             _ => {}
         }
     }

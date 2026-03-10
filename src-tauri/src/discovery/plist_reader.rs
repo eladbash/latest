@@ -7,7 +7,7 @@ pub struct PlistInfo {
 }
 
 pub fn read_plist(app_path: &str) -> Option<PlistInfo> {
-    let plist_path = format!("{}/Contents/Info.plist", app_path);
+    let plist_path = format!("{app_path}/Contents/Info.plist");
     let val: Value = plist::from_file(&plist_path).ok()?;
     let dict = val.as_dictionary()?;
 

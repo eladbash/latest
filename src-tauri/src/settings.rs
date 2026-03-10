@@ -5,8 +5,10 @@ use tauri_plugin_store::StoreExt;
 const STORE_PATH: &str = "settings.json";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Default)]
 pub enum CheckInterval {
     ThirtyMinutes,
+    #[default]
     OneHour,
     SixHours,
     Daily,
@@ -23,11 +25,6 @@ impl CheckInterval {
     }
 }
 
-impl Default for CheckInterval {
-    fn default() -> Self {
-        CheckInterval::OneHour
-    }
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Settings {
