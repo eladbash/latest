@@ -23,3 +23,6 @@ semver = "1"
 tokio = { version = "1", features = ["full"] }
 thiserror = "2"
 chrono = { version = "0.4", features = ["serde"] }
+futures = "0.3"
+window-vibrancy = "0.6"
+tauri-plugin-opener = "2.5.3"

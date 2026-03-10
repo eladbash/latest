@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "identifier": "com.latest.app",
   "build": {
-    "frontendDist": "../",
+    "frontendDist": "../dist",
     "devUrl": "http://localhost:1420",
-    "beforeDevCommand": "",
-    "beforeBuildCommand": ""
+    "beforeDevCommand": "npm run vite:dev",
+    "beforeBuildCommand": "npm run vite:build"
   },
   "app": {
     "withGlobalTauri": true,
@@ -15,16 +15,13 @@
     "windows": [],
     "security": {
       "csp": null
-    },
-    "trayIcon": {
-      "iconPath": "icons/tray-icon.png",
-      "iconAsTemplate": true
     }
   },
   "bundle": {
     "active": true,
     "targets": "all",
     "icon": [
+      "icons/icon.icns",
       "icons/icon.png"
     ]
   }

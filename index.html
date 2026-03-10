@@ -4,17 +4,60 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Latest</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
     <div id="app">
-      <header id="header">
-        <h1>Latest</h1>
-        <span id="update-count"></span>
-        <button id="settings-btn" title="Settings">⚙</button>
-      </header>
-      <div id="app-list"></div>
-      <div id="settings-panel" class="hidden"></div>
+      <!-- Top bar -->
+      <div id="topbar">
+        <div class="topbar-left">
+          <svg class="logo-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="17 1 21 5 17 9"></polyline>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+            <polyline points="7 23 3 19 7 15"></polyline>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+          </svg>
+          <span class="topbar-title">Latest</span>
+        </div>
+        <div class="topbar-actions">
+          <button id="refresh-btn" class="icon-btn" title="Check for Updates">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+          </button>
+          <button id="settings-btn" class="icon-btn" title="Settings">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="21" x2="4" y2="14"></line>
+              <line x1="4" y1="10" x2="4" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12" y2="3"></line>
+              <line x1="20" y1="21" x2="20" y2="16"></line>
+              <line x1="20" y1="12" x2="20" y2="3"></line>
+              <line x1="1" y1="14" x2="7" y2="14"></line>
+              <line x1="9" y1="8" x2="15" y2="8"></line>
+              <line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <div id="content">
+        <div id="app-list"></div>
+        <div id="settings-panel" class="hidden"></div>
+      </div>
+
+      <!-- Footer -->
+      <div id="app-footer">
+        <span class="footer-credit">Made by <a href="#" class="footer-link" data-url="https://github.com/eladbash">eladbash</a></span>
+      </div>
+
+      <!-- Toast -->
+      <div id="toast" class="hidden"></div>
     </div>
     <script type="module" src="/src/main.js"></script>
   </body>
